@@ -106,11 +106,9 @@ def main():
     app = ApplicationBuilder().token(token).build()
 
     app.add_handler(CommandHandler("start", start))
-
     app.add_handler(MessageHandler(filters.Regex("^➕ Добавить задачу$"), handle_add))
     app.add_handler(MessageHandler(filters.Regex("^📋 Показать задачи$"), handle_view))
-    
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     app.run_polling()
 
