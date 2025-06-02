@@ -22,7 +22,7 @@ async def run_bot():
     token = os.environ["BOT_TOKEN"]
     application = ApplicationBuilder().token(token).build()
     application.add_handler(CommandHandler("start", start))
-    await application.run_polling()
+    await application.run_polling(stop_signals=None)
 
 # Запуск Flask и бота параллельно
 if __name__ == '__main__':
