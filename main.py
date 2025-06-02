@@ -1,35 +1,41 @@
-from flask import Flask
-import threading
-import asyncio
 import os
+import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# Flask-заглушка
-app = Flask(__name__)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
 
-@app.route('/')
-def home():
-    return 'Bot is alive!'
+logger = logging.getLogger(__name__)
 
-# Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Привет, Стефания! Я помогу тебе спланировать день 🧭")
+    await update.message.reply_text(
+        "Привет, Стефания! Я твой планировщик. Пока могу принимать команды /help и /start."
+    )
 
-# Запуск бота с ручным event loop
-def run_bot():
-    asyncio.set_event_loop(asyncio.new_event_loop())
-    loop = asyncio.get_event_loop()
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Доступные команды:\n"
+        "/start - приветствие\n"
+        "/help - список команд\n"
+        "/add - добавить задачу (будет позже)\n"
+        "/list - показать задачи (будет позже)\n"
+        "/done - отметить задачу выполненной (будет позже)"
+    )
 
-    async def main():
-        token = os.environ["BOT_TOKEN"]
-        app_telegram = ApplicationBuilder().token(token).build()
-        app_telegram.add_handler(CommandHandler("start", start))
-        await app_telegram.run_polling(stop_signals=None)
+def main():
+    token = os.environ.get("BOT_TOKEN")
+    if not token:
+        logger.error("BOT_TOKEN не задан в переменных окружения")
+        return
 
-    loop.run_until_complete(main())
+    app = ApplicationBuilder().token(token).build()
 
-# Запуск Flask и бота
-if __name__ == '__main__':
-    threading.Thread(target=run_bot).start()
-    app.run(host='0.0.0.0', port=10000)
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
