@@ -56,6 +56,24 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Неверный номер задачи.")
 
+# ✨ Простые команды для теста памяти
+async def save(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    text = ' '.join(context.args)
+    if not text:
+        await update.message.reply_text("Укажи текст после /save")
+        return
+    db[str(user_id)] = text
+    await update.message.reply_text("Сохранил!")
+
+async def get(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    saved = db.get(str(user_id))
+    if saved:
+        await update.message.reply_text(f"Ты просила сохранить: {saved}")
+    else:
+        await update.message.reply_text("Пока ничего не сохранено.")
+
 def main():
     token = os.environ.get("BOT_TOKEN")
     if not token:
@@ -69,6 +87,8 @@ def main():
     app.add_handler(CommandHandler("add", add_task))
     app.add_handler(CommandHandler("list", list_tasks))
     app.add_handler(CommandHandler("done", done_task))
+    app.add_handler(CommandHandler("save", save))
+    app.add_handler(CommandHandler("get", get))
 
     app.run_polling()
 
