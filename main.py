@@ -25,7 +25,7 @@ def run_bot():
         token = os.environ["BOT_TOKEN"]
         app_telegram = ApplicationBuilder().token(token).build()
         app_telegram.add_handler(CommandHandler("start", start))
-        await app_telegram.run_polling()
+        await app_telegram.run_polling(stop_signals=None)
 
     loop.run_until_complete(main())
 
