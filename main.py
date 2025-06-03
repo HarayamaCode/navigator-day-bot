@@ -1,3 +1,4 @@
+from server import keep_alive
 import os
 import logging
 import datetime
@@ -27,7 +28,7 @@ DAY_LABELS = {
 MAIN_MENU = ReplyKeyboardMarkup([
     ["➕ Добавить задачу", "📋 Показать задачи"],
     ["✅ Завершить задачу", "🗑 Удалить задачу"],
-    ["📅 День недели"]
+    ["📅 День недели", "🔄 Перезапустить"]
 ], resize_keyboard=True)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -101,6 +102,11 @@ async def handle_view(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ], resize_keyboard=True, one_time_keyboard=True))
     context.user_data['state'] = 'awaiting_day_for_view'
 
+# Заглушки для ещё не реализованных кнопок
+async def handle_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Эта функция пока не работает, но скоро появится! 🔧", reply_markup=MAIN_MENU)
+    
+
 def main():
     token = os.environ.get("BOT_TOKEN")
     app = ApplicationBuilder().token(token).build()
@@ -108,8 +114,13 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.Regex("^➕ Добавить задачу$"), handle_add))
     app.add_handler(MessageHandler(filters.Regex("^📋 Показать задачи$"), handle_view))
+    app.add_handler(MessageHandler(filters.Regex("^✅ Завершить задачу$"), handle_soon))
+    app.add_handler(MessageHandler(filters.Regex("^🗑 Удалить задачу$"), handle_soon))
+    app.add_handler(MessageHandler(filters.Regex("^📅 День недели$"), handle_soon))
+    app.add_handler(MessageHandler(filters.Regex("^🔄 Перезапустить$"), start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
+    keep_alive()  # <-- Важно! Запускаем Flask-заглушку
     app.run_polling()
 
 if __name__ == '__main__':
